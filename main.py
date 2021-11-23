@@ -9,6 +9,7 @@ STOCK_API_KEY = "X6BB9IHVMM8BV7XD"
 NEWS_API_KEY = "5308635286874b3781ef4532c7ef4026"
 account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
+client = Client(account_sid, auth_token)
 assign_today = True
 assign_yesterday = True
 
@@ -24,10 +25,10 @@ stock_parameters = {
 }
 news_parameters = {
     "apiKey": NEWS_API_KEY,
-    "category": "business",
+    "sortBy": "popularity",
     "q": "Tesla",
     "language": "en",
-    "pageSize": 10,
+    "from": f"{yesterday}",
 }
 
 stock_response = requests.get("https://www.alphavantage.co/query", params=stock_parameters)
@@ -72,28 +73,26 @@ percentage_result = (today_close / yesterday_close) * 100 - 100
 print(f"{stock_name} stocks have been %", f"{percentage_result: .2f}", " changed")
 
 if percentage_result >= 5 or percentage_result <= -5:
-    news_response = requests.get("https://newsapi.org/v2/top-headlines", params=news_parameters)
+    news_response = requests.get("https://newsapi.org/v2/everything", params=news_parameters)
     news_response.raise_for_status()
     news_data = news_response.json()["articles"]
-    for news in news_data:
+    for news in news_data[:3]:
         news_title = news["title"]
         news_brief = news["description"]
-        # client = Client(account_sid, auth_token)
-        # message = client.messages.create(
-        #     to="+905375167270",
-        #     from_="+18043748512",
-        #     body=f"{STOCK} {percentage_result: .2f}½.\n{news_title}\n{news_brief}")
-        # print(message.sid)
-        # print(message.status)
-
-    client = Client(account_sid, auth_token)
-    message = client.messages.create(
-        to="+905375167270",
-        from_="+18043748512",
-        body=f"{STOCK} {percentage_result: .2f}½.\n{news_title}\n{news_brief}")
-    print(news_brief)
-    print(message.sid)
-    print(message.status)
+        message = client.messages.create(
+            to="+905375167270",
+            from_="+18043748512",
+            body=f"{STOCK} {percentage_result: .2f}½.\n{news_title}\n{news_brief}")
+        print(news_brief)
+        print(message.sid)
+        print(message.status)
+    # message = client.messages.create(
+    #     to="+905375167270",
+    #     from_="+18043748512",
+    #     body=f"{STOCK} {percentage_result: .2f}½.\n{news_title}\n{news_brief}")
+    # print(news_brief)
+    # print(message.sid)
+    # print(message.status)
 
 ## STEP 1: Use https://www.alphavantage.co
 # When STOCK price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
