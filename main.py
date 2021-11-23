@@ -1,3 +1,4 @@
+import os
 import requests
 import datetime as dt
 from twilio.rest import Client
@@ -6,12 +7,11 @@ STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 STOCK_API_KEY = "X6BB9IHVMM8BV7XD"
 NEWS_API_KEY = "5308635286874b3781ef4532c7ef4026"
-# Your Account SID from twilio.com/console
-account_sid = "AC1d88f63d13fa8b97a9dc07cfd6484b28"
-# Your Auth Token from twilio.com/console
-auth_token = "32fc675509cc938c6d9def563b3f70bc"
+account_sid = os.environ['TWILIO_ACCOUNT_SID']
+auth_token = os.environ['TWILIO_AUTH_TOKEN']
 assign_today = True
 assign_yesterday = True
+
 
 
 today = dt.datetime.now().date()
