@@ -5,15 +5,13 @@ from twilio.rest import Client
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
-STOCK_API_KEY = "X6BB9IHVMM8BV7XD"
-NEWS_API_KEY = "5308635286874b3781ef4532c7ef4026"
+STOCK_API_KEY = os.environ['STOCK_API_KEY']
+NEWS_API_KEY = os.environ['NEWS_API_KEY']
 account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
 client = Client(account_sid, auth_token)
 assign_today = True
 assign_yesterday = True
-
-
 
 today = dt.datetime.now().date()
 yesterday = dt.datetime.now().date() - dt.timedelta(days=1)
@@ -25,10 +23,8 @@ stock_parameters = {
 }
 news_parameters = {
     "apiKey": NEWS_API_KEY,
-    "sortBy": "popularity",
-    "q": "Tesla",
+    "qInTitle": COMPANY_NAME,
     "language": "en",
-    "from": f"{yesterday}",
 }
 
 stock_response = requests.get("https://www.alphavantage.co/query", params=stock_parameters)
@@ -45,10 +41,10 @@ print(stock_name)
 # Therefore to calculate yesterday or calculate today(if script runs everyday) it search open days in json data.
 while assign_today:
     try:
-        #if cannot find data in that day while we requested.Gives Key error...
+        # if cannot find data in that day while we requested.Gives Key error...
         today_close = float(stock_data["Time Series (Daily)"][f"{today}"]["1. open"])
     except KeyError:
-        #in here we going the day before and assign to varible to check data up there...
+        # in here we going the day before and assign to varible to check data up there...
         today = dt.datetime.now().date() - dt.timedelta(days=1)
     else:
         yesterday_close = today_close
@@ -69,7 +65,7 @@ print(yesterday, ": $", yesterday_close)
 
 # calculates percentage between 2 days
 percentage_result = (today_close / yesterday_close) * 100 - 100
-#f"{percentage_result: .2f}" stand for two digits after comma...
+# f"{percentage_result: .2f}" stand for two digits after comma...
 print(f"{stock_name} stocks have been %", f"{percentage_result: .2f}", " changed")
 
 if percentage_result >= 5 or percentage_result <= -5:
@@ -80,12 +76,14 @@ if percentage_result >= 5 or percentage_result <= -5:
         news_title = news["title"]
         news_brief = news["description"]
         message = client.messages.create(
-            to="+905375167270",
+            body=f"{STOCK} {percentage_result: .2f}½.\nTitle: {news_title}\nBrief: {news_brief}",
             from_="+18043748512",
-            body=f"{STOCK} {percentage_result: .2f}½.\n{news_title}\n{news_brief}")
+            to="+905375167270"
+        )
         print(news_brief)
         print(message.sid)
         print(message.status)
+
     # message = client.messages.create(
     #     to="+905375167270",
     #     from_="+18043748512",
